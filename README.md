@@ -1,5 +1,7 @@
 # Pistol Lethality (ACE Medical)
 
+![Pistol Lethality: an ACE Medical fix. Pistol-caliber rounds only. standard 9mm needs 3 stomach hits to kill instead of 4, torso and hip hits now bleed, and finishing a downed player is rifle-like.](.github/preview.png)
+
 **Sidearms that actually put people down, on servers running ACE Medical.**
 
 Author: **SyykoNT**
