@@ -3,7 +3,7 @@ GameProject {
  GUID "6DE298F3AB5669B8"
  TITLE "Pistol Lethality (ACE Medical)"
  Dependencies {
-  "58D0FB3206B6F859" "65B343F799FB521B"
+  "58D0FB3206B6F859" "65B343F799FB521B" "6586079789278413"
  }
  Configurations {
   GameProjectConfig PC {

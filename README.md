@@ -35,9 +35,11 @@ That's the whole change. Downed players still go down the way ACE intends, medic
 ## What it leaves alone
 
 - **Every round that isn't on the list.** Rifles, machine guns, grenades, explosives, melee and vehicle weapons do exactly what they did before.
-- **Armor.** Vests still stop pistol rounds. The extra damage is worked out from the HP the hit actually removed, after armor, so a round that a plate stops gets no bonus.
-- **ACE's medical rules.** Heart one-shots, femoral and neck bleeds, headshots, cardiac arrest, the Second Chance window, knockout and collapsed lungs all work the same way.
-- **Kill credit and hit effects.** The extra damage lands after the original hit has finished. Pain, knockout, the collapsed lung roll and kill credit all come from the original hit, and the shooter still gets the kill when the extra damage is what finishes someone.
+- **Armor.** Vests still stop pistol rounds. The bonus is applied to the hit after armor, so a round that a plate stops gets no bonus.
+- **ACE's medical rules.** Heart one-shots, femoral and neck bleeds, headshots, cardiac arrest, the Second Chance window, knockout and collapsed lungs all work the same way. One exception: a chest hit on a downed player gets the downed bonus before ACE rolls for a collapsed lung, so like a rifle hit it can collapse a lung.
+- **Knockout and pain.** These come from the original hit, so a pistol doesn't knock someone out any sooner than it does under plain ACE.
+- **Damage tracking and kill credit.** The bonus is part of the hit itself, not a separate step. Kill feeds, damage logs and spectator damage reports see the full damage of every hit, ACE Second Chance handles it like any other hit, and the shooter gets the kill.
+- **ACE's bleeding settings.** Pistol bleeds are normal ACE bleeds, so the bleeding rate scale and the maximum total bleeding rate apply to them. A hit only ever bleeds from the body part it struck.
 - **Treatment.** Pistol wounds are normal ACE wounds. Tourniquets, bandages, chest seals, saline, epinephrine, CPR, ammonium carbonate and morphine all work on them.
 
 ## Requirements
@@ -112,11 +114,11 @@ Treat the config like any other Reforger resource. Make a small addon that depen
 
 ## How it works
 
-The addon is three script files and one config. It extends the game's character hit zone class (`SCR_CharacterHitZone`, which ACE Medical builds on) through a `modded class`, and every override calls the original first.
+The addon is three script files and one config. It extends the game's character hit zone class (`SCR_CharacterHitZone`, which ACE Medical builds on) and the knockout and pain hit zones through `modded class`, and every override calls the original first.
 
-1. **Before the hit.** When a kinetic round strikes the chest, stomach or hips on the server, the addon checks which group the round's prefab belongs to (the answer is cached per prefab) and records the body part's HP.
-2. **After the hit.** Once ACE and the game have fully processed the hit, it measures how much HP the hit really removed.
-3. **Afterwards.** If that's over the wound minimum, it queues a normal ACE bleed on that body part. If a multiplier applies, it queues the extra HP loss, `(multiplier - 1) x damage dealt`, for the next update, so nothing interferes with the original hit.
+1. **During the hit.** When a kinetic round strikes the chest, stomach or hips on the server, the addon checks which group the round's prefab belongs to (the answer is cached per prefab). On the chest and stomach it multiplies that hit's damage, after armor. It is still one hit, so ACE and anything that records damage see the real number.
+2. **Knockout and pain.** ACE's knockout and pain pools get the same hit divided back by the multiplier, so they react exactly as they would without the addon.
+3. **After the hit.** If the hit, before the bonus, removed at least the wound minimum, it queues a normal ACE bleed on that body part.
 
 All of the damage logic runs on the server. Clients just see the result through ACE's normal health and bleeding sync.
 
@@ -128,7 +130,10 @@ Tested on a dedicated server running the COALITION Reforger Framework, by firing
 - Every rifle, machine gun and grenade case gives identical results with the fix off and on.
 - ACE's own mechanics behave the same: heart one-shot, femoral and neck bleeds, headshots, cardiac arrest, the Second Chance window, knockout, collapsed lungs and grenades.
 - Medics can treat pistol wounds the normal way, and every pistol cardiac arrest in testing was brought back with CPR.
-- Kill credit goes to the shooter, including when the extra damage is what finishes the target.
+- Kill credit goes to the shooter, including when the bonus is what finishes the target.
+- A damage tracker on the server (the same hook the COALITION spectator damage report uses) sees exactly the HP each hit removes.
+- Second Chance still triggers at SMG fire rates (70 to 100 ms between hits), and knockout happens on the same hit as with the addon off.
+- ACE's maximum total bleeding rate and bleeding rate scale hold with the addon on. No hit started more than one bleed.
 - Vests still stop pistol rounds.
 - It works at range. Pistols lose some damage out to 100 m, but every hit still starts a bleed.
 - Every pistol and PDW round fired by a weapon or magazine in the CRF gearscripts is on the list (777 references traced to 213 rounds), and no rifle round is.
