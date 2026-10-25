@@ -1,0 +1,6 @@
+# Workbench cache, rebuilt on every launch
+resourceDatabase.rdb
+*.rdb
+
+# Local tooling that should never ship
+Scripts/WorkbenchGame/EnfusionMCP/
