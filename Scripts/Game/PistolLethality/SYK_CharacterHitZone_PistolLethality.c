@@ -11,7 +11,8 @@
 //!  - Downed bonus: on a downed target whose ACE Second Chance window has expired, the multiplier is
 //!    the downed one. The window itself is untouched.
 //!  - Wound rule: a listed round whose hit (before the bonus) removes at least the wound minimum from
-//!    the chest, abdomen or hips starts an ACE bleed on that body part.
+//!    the chest or abdomen starts an ACE bleed on that body part. The hips only when the group's
+//!    m_bWoundOnHips is on (off by default, so pistols don't bleed from body parts rifles don't).
 //! Everything runs on the server. Rifles, frag, melee and every other damage source are unchanged.
 
 //------------------------------------------------------------------------------------------------
@@ -96,6 +97,9 @@ modded class SCR_CharacterHitZone : SCR_RegeneratingHitZone
 
 		SYK_PistolLethalityGroup group = m_SYK_PendingPistolGroup;
 		m_SYK_PendingPistolGroup = null;
+		if (m_eSYK_PistolZone == SYK_EPistolLethalityZone.HIPS && !group.m_bWoundOnHips)
+			return;
+
 		if (group.m_fWoundMinimumDamage >= 0 && m_fSYK_PendingPistolBaseDamage >= group.m_fWoundMinimumDamage)
 			GetGame().GetCallqueue().Call(SYK_StartPistolBleeding);
 	}

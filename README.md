@@ -1,6 +1,6 @@
 # Pistol Lethality (ACE Medical)
 
-![Pistol Lethality: an ACE Medical fix. Pistol-caliber rounds only. standard 9mm needs 3 stomach hits to kill instead of 4, torso and hip hits now bleed, and finishing a downed player is rifle-like.](.github/preview.png)
+![Pistol Lethality: an ACE Medical fix. Pistol-caliber rounds only. standard 9mm needs 3 stomach hits to kill instead of 4, torso hits now bleed, and finishing a downed player is rifle-like.](.github/preview.png)
 
 **Sidearms that actually put people down, on servers running ACE Medical.**
 
@@ -28,7 +28,9 @@ These rules only apply to rounds on the list:
 |---|---|---|
 | Stomach hit, for rounds that need 4 or more stomach hits | Normal damage | 30% more HP lost. Standard 9x19 ball and .45 now take 3 stomach hits instead of 4, the same as a 5.45 rifle. Rounds that already kill in 3 or fewer get no stomach bonus, so no pistol round out-kills a 5.45. |
 | Chest or stomach hit on a downed player, after ACE Second Chance has run out | Normal damage | 60% more HP lost. Finishing someone off takes about as many rounds as it would with a rifle. |
-| A hit that takes 10 HP or more off the chest, stomach or hips | Usually no wound | Starts a normal ACE bleed |
+| A hit that takes 10 HP or more off the chest or stomach | Usually no wound | Starts a normal ACE bleed |
+
+Hips, arms and legs keep ACE's normal wound rule. Rifle hits at range don't bleed from the hips either, so pistols get the same set of bleeding body parts as rifles, with bleeds that scale down with their lower damage. Groups can switch hip bleeds on in the config.
 
 That's the whole change. Downed players still go down the way ACE intends, medics still have something to treat, and pistols are a real threat again.
 
@@ -45,7 +47,7 @@ That's the whole change. Downed players still go down the way ACE intends, medic
 ## Requirements
 
 - Arma Reforger 1.8
-- **ACE Medical Hitzones Dev**, which also brings in ACE Medical Core Dev and ACE Core Dev. These are the same ACE builds the COALITION Reforger Framework runs on.
+- **ACE Medical Hitzones Dev** and **ACE Medical Core Dev**, which bring in ACE Core Dev. These are the same ACE builds the COALITION Reforger Framework runs on.
 
 ## Installation
 
@@ -96,7 +98,8 @@ All the numbers are in [`Configs/PistolLethality/SYK_PistolLethality.conf`](Conf
 | `m_fChestMultiplier` | `1` | Total HP a chest hit removes, as a multiple of the original hit. `1` means unchanged. |
 | `m_fAbdomenMultiplier` | `1.3` | The same for stomach hits. |
 | `m_fDownedMultiplier` | `1.6` | Chest and stomach multiplier on a downed player once ACE Second Chance has run out. |
-| `m_fWoundMinimumDamage` | `10` | A hit that removes at least this much HP from the chest, stomach or hips starts a bleed. A negative value turns this off. |
+| `m_fWoundMinimumDamage` | `10` | A hit that removes at least this much HP from the chest or stomach starts a bleed. A negative value turns this off. |
+| `m_bWoundOnHips` | `0` | `1` applies the wound minimum to hip hits too. Off by default, because rifle hip hits at range don't bleed. |
 
 Three groups ship with the addon:
 
@@ -116,7 +119,7 @@ Treat the config like any other Reforger resource. Make a small addon that depen
 
 The addon is three script files and one config. It extends the game's character hit zone class (`SCR_CharacterHitZone`, which ACE Medical builds on) and the knockout and pain hit zones through `modded class`, and every override calls the original first.
 
-1. **During the hit.** When a kinetic round strikes the chest, stomach or hips on the server, the addon checks which group the round's prefab belongs to (the answer is cached per prefab). On the chest and stomach it multiplies that hit's damage, after armor. It is still one hit, so ACE and anything that records damage see the real number.
+1. **During the hit.** When a kinetic round strikes the chest or stomach on the server (or the hips, if a group has hip bleeds on), the addon checks which group the round's prefab belongs to (the answer is cached per prefab). On the chest and stomach it multiplies that hit's damage, after armor. It is still one hit, so ACE and anything that records damage see the real number.
 2. **Knockout and pain.** ACE's knockout and pain pools get the same hit divided back by the multiplier, so they react exactly as they would without the addon.
 3. **After the hit.** If the hit, before the bonus, removed at least the wound minimum, it queues a normal ACE bleed on that body part.
 
@@ -126,7 +129,7 @@ All of the damage logic runs on the server. Clients just see the result through 
 
 Tested on a dedicated server running the COALITION Reforger Framework, by firing the same shots with the fix off and on:
 
-- Every listed round (43 distinct prefabs) was fired at the chest, stomach and hips. Only the intended changes show up: one fewer stomach hit for the Pistol group, bleeding from solid torso and hip hits, and no stomach change for the strong rounds.
+- Every listed round (43 distinct prefabs) was fired at the chest, stomach and hips. Only the intended changes show up: one fewer stomach hit for the Pistol group, bleeding from chest and stomach hits, and no stomach change for the strong rounds.
 - Every rifle, machine gun and grenade case gives identical results with the fix off and on.
 - ACE's own mechanics behave the same: heart one-shot, femoral and neck bleeds, headshots, cardiac arrest, the Second Chance window, knockout, collapsed lungs and grenades.
 - Medics can treat pistol wounds the normal way, and every pistol cardiac arrest in testing was brought back with CPR.
@@ -135,7 +138,7 @@ Tested on a dedicated server running the COALITION Reforger Framework, by firing
 - Second Chance still triggers at SMG fire rates (70 to 100 ms between hits), and knockout happens on the same hit as with the addon off.
 - ACE's maximum total bleeding rate and bleeding rate scale hold with the addon on. No hit started more than one bleed.
 - Vests still stop pistol rounds.
-- It works at range. Pistols lose some damage out to 100 m, but every hit still starts a bleed.
+- It works at range. Pistols lose some damage out to 100 m, but every chest and stomach hit still starts a bleed.
 - Every pistol and PDW round fired by a weapon or magazine in the CRF gearscripts is on the list (777 references traced to 213 rounds), and no rifle round is.
 - Scripts compile for the PC, Xbox and PlayStation configurations, and the addon loads with only its ACE dependencies.
 

@@ -21,8 +21,11 @@ class SYK_PistolLethalityGroup
 	[Attribute(defvalue: "1", desc: "Chest and abdomen multiplier on a downed target after ACE's Second Chance window has expired", params: "1 20")]
 	float m_fDownedMultiplier;
 
-	[Attribute(defvalue: "10", desc: "A hit that removed at least this much HP from the chest, abdomen or hips starts an ACE bleed. Negative = off.", params: "-1 100")]
+	[Attribute(defvalue: "10", desc: "A hit that removed at least this much HP from the chest or abdomen (and the hips, if switched on below) starts an ACE bleed. Negative = off.", params: "-1 100")]
 	float m_fWoundMinimumDamage;
+
+	[Attribute(defvalue: "0", desc: "Also apply the wound rule to hip hits. Off by default: rifle hip hits at range stay under the vanilla bleed threshold, so pistols would out-bleed rifles there.")]
+	bool m_bWoundOnHips;
 }
 
 //------------------------------------------------------------------------------------------------
